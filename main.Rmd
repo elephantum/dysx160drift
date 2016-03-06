@@ -59,11 +59,11 @@ ggplot(data = data, aes(x=t)) + geom_line(aes(y=angle)) + theme(legend.position 
 
 Most unfortunate in this situation is that it's not a fixed offset, which you can adjust in cleanflight. Accelerometer error is clearly a function of how fast motors are spinning, no simple adjustment can fix it. To make this statement obvious lets plot accelerometer error as a function of motors engagement:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=3}
 ggplot(data = data, aes(x=(Motor0+Motor1+Motor2+Motor3), y=angle)) + geom_point() + geom_smooth()  + theme(legend.position = "bottom", legend.direction = "horizontal")
 ```
 
-One can see that there is a strong correlation, the faster you go, the more drift becomes. This result agrees with my intuitive understanding of the issue from several attempts to fly my Dys X160.
+One can see that there is a strong correlation, the faster you go, the stronger drift becomes. This result agrees with my intuitive understanding of the issue from several attempts to fly my Dys X160.
 
 # Conclusion
 
