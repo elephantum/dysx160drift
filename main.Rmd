@@ -1,0 +1,70 @@
+---
+title: "Dys X160 drift issue"
+output: html_document
+---
+
+```{r, echo=FALSE, message=FALSE}
+library(reshape)
+library(dplyr)
+library(ggplot2)
+
+data.csv <- read.csv("cleanflight_data_log.csv")
+
+data <- data.csv %>% filter(RC4 > 1500) %>% filter(Motor1 > 1000) %>%
+  mutate(angle = acos(accelerometerZ / sqrt(accelerometerX**2 + accelerometerY**2 + accelerometerZ**2)) * pi * 2) %>%
+  mutate(t = row_number() * 50)
+```
+
+# TL;DR
+
+Dys X160 is a nice quadcopter which has an issue with drifting (mostly to the right, but some users report drifting to the left) in self-leveling mode. I had a deeper look into this behavior and collected evidence that this is a hardware design issue, which cannot be fixed by PID tuning and such.
+
+# Collecting data
+
+So I conducted an experiment with drone connected to cleanflight:
+
+1. take a drone with props off
+1. fix it on level surface, so that it doesn't move and accelerometer is pointing directly down: (x=0, y=0, z=1)
+1. start tethered logging for motors and sensors
+1. increase throttle to max, while logging
+1. look for anomalies in data
+
+# Analyzing data
+
+Here's the data I collected. (*TODO link to raw file*)
+
+Motors:
+
+```{r, echo=FALSE, fig.height=3}
+motor <- data %>% select(t, Motor0, Motor1, Motor2, Motor3)
+ggplot(data = melt(motor, id.vars = c("t")), aes(x=t, y=value)) + geom_line(aes(color=variable)) + theme(legend.position = "bottom", legend.direction = "horizontal")
+```
+
+Accelerometer:
+
+```{r, echo=FALSE, fig.height=3}
+accelerometer <- data %>% select(t, starts_with("accelerometer"))
+ggplot(data = melt(accelerometer, id.vars = c("t")), aes(x=t, y=value)) + geom_line(aes(color=variable)) + theme(legend.position = "bottom", legend.direction = "horizontal")
+```
+
+Seems like the more throttle we put the more unstable accelerometer behaves. Note, that most affected is Y-axis (which controls Roll) with clear offset: drone starts to think that it should correct it's position, hence the drift.
+
+Let's convert accelerometer data to an angle between real direction down and what accelerometer thinks:
+
+```{r, echo=FALSE, fig.height=3}
+ggplot(data = data, aes(x=t)) + geom_line(aes(y=angle)) + theme(legend.position = "bottom", legend.direction = "horizontal")
+```
+
+Most unfortunate in this situation is that it's not a fixed offset, which you can adjust in cleanflight, accelerometer error is clearly a function of how fast motors are spinning, no simple adjustment can fix it. To make this statement obvious lets plot accelerometer error as a function of motors engagement:
+
+```{r, echo=FALSE}
+ggplot(data = data, aes(x=(Motor0+Motor1+Motor2+Motor3), y=angle)) + geom_point() + geom_smooth()  + theme(legend.position = "bottom", legend.direction = "horizontal")
+```
+
+One can see that there is a strong correlation, the faster you go, the more drift becomes. This result agrees with my intuitive understanding of the issue from several attempts to fly my Dys X160.
+
+# Conclusion
+
+Given that there is strong evidence that accelerometer in Dys X160 drifts from real director as a function of motors engagement, I tend to suggest hardware design issue. Most probably vibration from motors interfere with accelerometer work in consistent way.
+
+Maybe there is some sort of hardware fix like switching screws between control board and frame to thick double sided tape or similar way to dampen vibration. This research might be done in the future.
