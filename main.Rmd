@@ -17,7 +17,9 @@ data <- data.csv %>% filter(RC4 > 1500) %>% filter(Motor1 > 1000) %>%
 
 # TL;DR
 
-Dys X160 is a nice quadcopter which has an issue with drifting (mostly to the right, but some users report drifting to the left) in self-leveling mode. I had a deeper look into this behavior and collected evidence that this is a hardware design issue, which cannot be fixed by PID tuning and such.
+[Dys X160](http://www.banggood.com/DYS-X160-Micro-FPV-Racer-with-5_8G-32CH-200mW-Transmitter-13-CMOS-Wide-Lens-ARF-p-1002021.html) is a nice quadcopter which has an issue with drifting (mostly to the right, but some users report drifting to the left) in self-leveling mode. I had a deeper look into this behavior and collected evidence that this is a hardware design issue, which cannot be fixed by software: PID tuning and such. I have no suggestions for hardware fixes at the moment.
+
+All data and scripts are available on GitHub: [elephantum/dysx160drift](https://github.com/elephantum/dysx160drift)
 
 # Collecting data
 
@@ -31,7 +33,7 @@ So I conducted an experiment with drone connected to cleanflight:
 
 # Analyzing data
 
-Here's the data I collected. (*TODO link to raw file*)
+Here's the data I collected. (You can find raw data here: [cleanflight_data_log.csv](https://github.com/elephantum/dysx160drift/blob/master/cleanflight_data_log.csv))
 
 Motors:
 
@@ -55,7 +57,7 @@ Let's convert accelerometer data to an angle between real direction down and wha
 ggplot(data = data, aes(x=t)) + geom_line(aes(y=angle)) + theme(legend.position = "bottom", legend.direction = "horizontal")
 ```
 
-Most unfortunate in this situation is that it's not a fixed offset, which you can adjust in cleanflight, accelerometer error is clearly a function of how fast motors are spinning, no simple adjustment can fix it. To make this statement obvious lets plot accelerometer error as a function of motors engagement:
+Most unfortunate in this situation is that it's not a fixed offset, which you can adjust in cleanflight. Accelerometer error is clearly a function of how fast motors are spinning, no simple adjustment can fix it. To make this statement obvious lets plot accelerometer error as a function of motors engagement:
 
 ```{r, echo=FALSE}
 ggplot(data = data, aes(x=(Motor0+Motor1+Motor2+Motor3), y=angle)) + geom_point() + geom_smooth()  + theme(legend.position = "bottom", legend.direction = "horizontal")
@@ -65,6 +67,6 @@ One can see that there is a strong correlation, the faster you go, the more drif
 
 # Conclusion
 
-Given that there is strong evidence that accelerometer in Dys X160 drifts from real director as a function of motors engagement, I tend to suggest hardware design issue. Most probably vibration from motors interfere with accelerometer work in consistent way.
+Given that there is strong evidence that accelerometer in Dys X160 drifts from real direction as a function of motors engagement, I tend to suggest hardware design issue. Most probably vibration from motors is interfering with accelerometer work in semi-consistent way. This makes flying quad in self-leveling mode challenging, but does not affect acro-mode.
 
 Maybe there is some sort of hardware fix like switching screws between control board and frame to thick double sided tape or similar way to dampen vibration. This research might be done in the future.
