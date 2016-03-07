@@ -70,3 +70,14 @@ One can see that there is a strong correlation, the faster you go, the stronger 
 Given that there is strong evidence that accelerometer in Dys X160 drifts from real direction as a function of motors engagement, I tend to suggest hardware design issue. Most probably vibration from motors is interfering with accelerometer work in semi-consistent way. This makes flying quad in self-leveling mode challenging, but does not affect acro-mode.
 
 Maybe there is some sort of hardware fix like switching screws between control board and frame to thick double sided tape or similar way to dampen vibration. This research might be done in the future.
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-74831801-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
